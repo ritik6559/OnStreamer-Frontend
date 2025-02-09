@@ -45,6 +45,9 @@ function RootLayoutNav() {
     <GestureHandlerRootView>
         <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name='videoDetails' options={{
+                headerShown: false
+            }} />
         </Stack>
     </GestureHandlerRootView>
       );

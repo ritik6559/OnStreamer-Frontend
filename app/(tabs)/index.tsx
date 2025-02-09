@@ -25,14 +25,13 @@ const VideoListScreen = () => {
   const [videos, setVideos] = useState<VideoDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedVideo, setSelectedVideo] = useState<number | null>(null);
-
+  
   const fetchVideos = async () => {
     try {
       setLoading(true);
       setError(null);
       const result = await getAllVideos();
-      setVideos(result); // Ensure API response has expected structure
+      setVideos(result); 
     } catch (err: any) {
       setError(err.message || 'Error fetching videos');
     } finally {
@@ -65,19 +64,10 @@ const VideoListScreen = () => {
         onPress={handlePress}
       >
         <View style={styles.videoPreview}>
-          {selectedVideo === item.id ? (
-            <Video
-              source={{ uri: `http://192.168.32.99:8080/api/v1/videos/stream/${item.id}` }}
-              style={styles.video}
-              useNativeControls
-              resizeMode={ResizeMode.COVER}
-              isLooping
-            />
-          ) : (
             <View style={styles.thumbnailContainer}>
               <Text style={styles.playIcon}>▶️</Text>
             </View>
-          )}
+          
         </View>
 
         <View style={styles.videoInfo}>

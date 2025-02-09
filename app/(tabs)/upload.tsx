@@ -102,32 +102,29 @@ const VideoUploadScreen = () => {
     <View style={styles.container}>
       <Text style={styles.header}>Upload Video</Text>
 
-      <TouchableOpacity
-        style={styles.uploadVideoContainer}
-        onPress={pickVideo}
-        disabled={loading}
-      >
-        <View>
-            <Image source={icons.upload_icon} /> 
-            <Text style={{ color: 'grey', fontWeight: 'bold', alignSelf: 'center'}} >
-                Select file
-            </Text>
-        </View>
-      </TouchableOpacity>
+      {video && !video.canceled && video.assets && video.assets[0] ? 
+            <View style={styles.previewContainer}>
+                <Video
+                    source={{ uri: video!.assets[0].uri }}
+                    style={styles.videoPreview}
+                    useNativeControls
+                    resizeMode={ResizeMode.CONTAIN}
+                />
+                    <Text style={styles.fileName}>
+                        Duration: {Math.round(video.assets[0].duration || 0)} seconds
+                    </Text>
+            </View> : 
+                <TouchableOpacity 
+                    style={styles.uploadVideoContainer}
+                    onPress={pickVideo}
+                    disabled={loading}>
+                        <View>
+                            <Image source={icons.upload_icon} /> 
+                            <Text style={{ color: 'grey', fontWeight: 'bold', alignSelf: 'center'}} > Select file </Text>
+                        </View>
+                </TouchableOpacity>
+     }  
 
-      {video && !video.canceled && video.assets && video.assets[0] && (
-        <View style={styles.previewContainer}>
-          <Video
-            source={{ uri: video!.assets[0].uri }}
-            style={styles.videoPreview}
-            useNativeControls
-            resizeMode={ResizeMode.CONTAIN}
-          />
-          <Text style={styles.fileName}>
-            Duration: {Math.round(video.assets[0].duration || 0)} seconds
-          </Text>
-        </View>
-      )}
 
       <TextInput
         style={styles.input}
@@ -202,6 +199,8 @@ const styles = StyleSheet.create({
   },
   previewContainer: {
     marginBottom: 15,
+    flexDirection: 'column',
+    borderRadius: 20
   },
   videoPreview: {
     width: '100%',
