@@ -15,15 +15,19 @@ An online video streaming application built using **React Native**, **AWS S3**, 
 
 ## Installation
 ### Frontend (React Native)
-1. Navigate to the frontend folder:
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/ritik6559/OnStreamer-Frontend.git
+   ```
+2. Navigate to the frontend folder:
    ```sh
    cd OnStreamer-frontend
    ```
-2. Install dependencies:
+3. Install dependencies:
    ```sh
    npm install
    ```
-3. Start the application:
+4. Start the application:
    ```sh
    npx expo start
    ```
