@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
 import { getAllVideos } from '../api/videoApi';
+import { router } from 'expo-router';
 
 interface VideoDto {
   id: number;
@@ -20,13 +21,7 @@ interface VideoDto {
   uploadDate: string;
 }
 
-interface ApiResponse {
-  message: string;
-  object: VideoDto[];
-}
-
 const VideoListScreen = () => {
-
   const [videos, setVideos] = useState<VideoDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,55 +29,65 @@ const VideoListScreen = () => {
 
   const fetchVideos = async () => {
     try {
-
       setLoading(true);
       setError(null);
-      
       const result = await getAllVideos();
-
-      setVideos(result);
-
+      setVideos(result); // Ensure API response has expected structure
     } catch (err: any) {
-    
-        setError(err.message || 'Error fetching videos');
-    
+      setError(err.message || 'Error fetching videos');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-
     fetchVideos();
-  
   }, []);
 
-  const renderVideoItem = ({ item }: { item: VideoDto }) => (
-    <TouchableOpacity 
-      style={styles.videoCard}
-      onPress={() => setSelectedVideo(selectedVideo === item.id ? null : item.id)}
-    >
-      <View style={styles.videoPreview}>
-        {selectedVideo === item.id ? (
-          <Video
-            source={{ uri: `${API_URL}/stream/${item.id}` }}
-            style={styles.video}
-            useNativeControls
-            resizeMode={ResizeMode.COVER}
-            isLooping
-          />
-        ) : (
-          <View style={styles.thumbnailContainer}>
-            <Text style={styles.playIcon}>▶️</Text>
-          </View>
-        )}
-      </View>
-      
-      <View style={styles.videoInfo}>
-        <Text style={styles.title}>{item.title}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const RenderVideoItem = ({ item }: { item: VideoDto }) => {
+    const handlePress = () => {
+      router.push({
+        pathname: '/videoDetails',
+        params: {
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          url: item.url,
+          fileSize: item.fileSize,
+          uploadDate: item.uploadDate,
+        },
+      });
+    };
+
+    return (
+      <TouchableOpacity
+        style={styles.videoCard}
+        onPress={handlePress}
+      >
+        <View style={styles.videoPreview}>
+          {selectedVideo === item.id ? (
+            <Video
+              source={{ uri: `http://192.168.32.99:8080/api/v1/videos/stream/${item.id}` }}
+              style={styles.video}
+              useNativeControls
+              resizeMode={ResizeMode.COVER}
+              isLooping
+            />
+          ) : (
+            <View style={styles.thumbnailContainer}>
+              <Text style={styles.playIcon}>▶️</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.videoInfo}>
+          <Text style={styles.title} numberOfLines={2}>
+            {item.title}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   if (loading) {
     return (
@@ -108,14 +113,12 @@ const VideoListScreen = () => {
       <Text style={styles.header}>OnStreamer</Text>
       <FlatList
         data={videos}
-        renderItem={renderVideoItem}
+        renderItem={({ item }) => <RenderVideoItem item={item} />}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
         refreshing={loading}
         onRefresh={fetchVideos}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No videos found</Text>
-        }
+        ListEmptyComponent={<Text style={styles.emptyText}>No videos found</Text>}
       />
     </View>
   );
@@ -138,7 +141,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     padding: 20,
     paddingBottom: 10,
-    color: '#fff'
+    color: '#fff',
   },
   listContainer: {
     padding: 10,
@@ -180,12 +183,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
-    color: '#fff'
-  },
-  description: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+    color: '#fff',
   },
   errorText: {
     color: 'grey',
