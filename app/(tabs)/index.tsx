@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { Video, ResizeMode } from 'expo-av';
+import { getAllVideos } from '../api/videoApi';
 
 interface VideoDto {
   id: number;
@@ -25,46 +26,36 @@ interface ApiResponse {
 }
 
 const VideoListScreen = () => {
+
   const [videos, setVideos] = useState<VideoDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<number | null>(null);
 
-  const API_URL = "http://192.168.32.99:8080/api/v1/videos";
-
   const fetchVideos = async () => {
     try {
+
       setLoading(true);
       setError(null);
-      console.log('Fetching videos...');
-      const response = await fetch(`${API_URL}/list-videos`);
-      const result: ApiResponse = await response.json();
-      console.log('API Response:', result);
+      
+      const result = await getAllVideos();
 
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to fetch videos');
-      }
+      setVideos(result);
 
-      setVideos(result.object);
     } catch (err: any) {
-      setError(err.message || 'Error fetching videos');
-      console.error('Error:', err);
+    
+        setError(err.message || 'Error fetching videos');
+    
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchVideos();
-  }, []);
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
+    fetchVideos();
+  
+  }, []);
 
   const renderVideoItem = ({ item }: { item: VideoDto }) => (
     <TouchableOpacity 
@@ -77,7 +68,7 @@ const VideoListScreen = () => {
             source={{ uri: `${API_URL}/stream/${item.id}` }}
             style={styles.video}
             useNativeControls
-            resizeMode={ResizeMode.CONTAIN}
+            resizeMode={ResizeMode.COVER}
             isLooping
           />
         ) : (
@@ -89,10 +80,6 @@ const VideoListScreen = () => {
       
       <View style={styles.videoInfo}>
         <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.description}>{item.description}</Text>
-        <Text style={styles.metadata}>
-          Size: {formatFileSize(item.fileSize)}
-        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -118,7 +105,7 @@ const VideoListScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Videos ({videos!.length})</Text>
+      <Text style={styles.header}>OnStreamer</Text>
       <FlatList
         data={videos}
         renderItem={renderVideoItem}
@@ -137,7 +124,7 @@ const VideoListScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#420039',
     paddingTop: Platform.OS === 'android' ? 25 : 0,
   },
   centerContainer: {
@@ -151,12 +138,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     padding: 20,
     paddingBottom: 10,
+    color: '#fff'
   },
   listContainer: {
     padding: 10,
   },
   videoCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#12355B',
     borderRadius: 12,
     marginBottom: 15,
     shadowColor: '#000',
@@ -169,7 +157,7 @@ const styles = StyleSheet.create({
   videoPreview: {
     width: '100%',
     height: 200,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#000',
   },
   video: {
     width: '100%',
@@ -180,7 +168,7 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#000',
   },
   playIcon: {
     fontSize: 40,
@@ -192,18 +180,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
+    color: '#fff'
   },
   description: {
     fontSize: 14,
     color: '#666',
     marginBottom: 8,
   },
-  metadata: {
-    fontSize: 12,
-    color: '#888',
-  },
   errorText: {
-    color: 'red',
+    color: 'grey',
     marginBottom: 15,
     textAlign: 'center',
   },

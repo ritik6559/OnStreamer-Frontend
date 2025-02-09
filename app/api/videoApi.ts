@@ -7,6 +7,21 @@ interface VideoUploadScreenProps {
     title: string;
     description: string;
 }
+ 
+interface VideoDto {
+  id: number;
+  title: string;
+  description: string;
+  url: string;
+  fileSize: number;
+  uploadDate: string;
+}
+
+
+interface FetchVideosResponse {
+    message: string;
+    object: VideoDto[]
+}
 
 export const uploadFile = async ({ video, title, description } : VideoUploadScreenProps) => {
     const API_URL = `${BASE_URL}/upload`;
@@ -44,4 +59,21 @@ export const uploadFile = async ({ video, title, description } : VideoUploadScre
     }
 
     return response;
+}
+
+
+export const getAllVideos = async () => {
+    
+    const response = await fetch(`${BASE_URL}/list-videos`);
+    const result: FetchVideosResponse = await response.json();
+
+    console.log("Api Response", result);
+    
+
+    if(!response.ok){
+        throw new Error(result.message || 'Failed to fetch videos');
+    }
+
+    return result.object;
+
 }
